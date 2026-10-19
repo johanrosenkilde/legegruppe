@@ -1,3 +1,3 @@
-import { solve, solveMinRounds } from './solver.js';
+importScripts('solver.js');
 
-onmessage = ({ data }) => postMessage(data.rounds ? solve(data) : solveMinRounds(data));
+onmessage = ({ data }) => postMessage(data.rounds ? Solver.solve(data) : Solver.solveMinRounds(data));

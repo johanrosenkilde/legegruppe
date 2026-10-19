@@ -17,7 +17,11 @@ Alt bliver beregnet i browseren, så navnene bliver ikke sendt til en server.
 3. Vælg antal runder, eller lad feltet stå tomt. Så finder værktøjet det mindste antal runder, hvor alle har mødt alle.
 4. Klik **Lav plan**. Klik **Nyt forslag** for at få en anden plan med de samme indstillinger.
 
-Planen kan hentes som CSV eller udskrives. Adressen i browseren indeholder navne og indstillinger, så du kan gemme eller dele en plan som et link. Samme link og seed giver samme plan.
+Hver runde har et felt, hvor du kan skrive en dato eller en måned. Planen kan hentes som CSV eller udskrives.
+
+Adressen i browseren indeholder navne, indstillinger, plan og etiketter, så du kan gemme planen som et bogmærke. Klik **Del planen** for at få et link, der kun viser planen, uden redigering. Den, der får linket, kan klikke på sit barn og se barnets grupper og værtskaber.
+
+Indholdet står komprimeret og base64-kodet i adressen, så navnene ikke kan læses direkte. Det er ikke kryptering: alle med linket kan se planen. Indholdet står efter `#` i adressen, så browseren sender det ikke til serveren.
 
 ### Kategorier
 
@@ -44,6 +48,12 @@ Grupperne bliver fundet med *simulated annealing*. Et træk bytter to børn i fo
 - (c − 1)³ for et par, der mødes c gange,
 - 1000 hver gang et barn er alene om sin kategori i en gruppe.
 
+Planens samlede strafpoint er summen af de to første led. Siden viser strafpoint sammen med en nedre grænse, så du kan sammenligne forslag. Grænsen bygger på, at to runder altid har et vist antal par til fælles: deres G² gruppe-fællesmængder summerer til N, så nogle af dem indeholder mindst to børn. Det giver en ulighed for, hvor mange par der mødes flere gange. Grænsen er optimum af det lineære program, der følger af den ulighed og af det samlede antal møder.
+
+For 24 børn i 4 grupper af 6 over 6 runder giver det: antallet af par, der aldrig mødes, plus antallet af par, der mødes 3 gange, er mindst 36. Planen kan altså ikke både nå rundt til alle og undgå, at nogle par mødes 3 gange. Ingen plan kan komme under 300 strafpoint.
+
+Knappen **Søg grundigere** kører otte gange så mange skridt i søgningen.
+
 Værterne bliver fordelt bagefter med en tilsvarende søgning. Søgningen udjævner først antallet af værtskaber og spreder dem derefter i tid.
 
 Når antallet af runder ligger tæt på den nedre grænse, finder søgningen ikke altid en plan, hvor alle mødes. Det gælder fx for 24 børn i grupper af 4 med 8 runder, selvom litteraturen tyder på, at en sådan plan findes. Typisk er én eller to ekstra runder nok. Kendte eksakte konstruktioner som affine planer og Kirkman-systemer er ikke indbygget, men søgningen finder dem selv i små tilfælde (15/3/7 og 25/5/6).
@@ -52,18 +62,13 @@ Når antallet af runder ligger tæt på den nedre grænse, finder søgningen ikk
 
 Værktøjet er en statisk side uden afhængigheder og uden build-trin:
 
-- `index.html` indeholder sidens opbygning og CSS.
+- `index.html` indeholder sidens tekst og CSS.
 - `app.js` indeholder brugerfladen.
 - `solver.js` indeholder algoritmen.
 - `worker.js` kører algoritmen i baggrunden, så siden ikke fryser.
+- `fonts/` indeholder skrifterne Shantell Sans og Atkinson Hyperlegible, som begge er udgivet under SIL Open Font License.
 
-Moduler kan ikke indlæses fra `file://`, så siden skal serveres lokalt:
-
-```sh
-python3 -m http.server
-```
-
-Åbn derefter <http://localhost:8000>.
+Du kan åbne `index.html` direkte i browseren.
 
 Kør testene med Node.js 18 eller nyere:
 

@@ -1,6 +1,8 @@
 // Run with: node test.js
 import assert from 'node:assert/strict';
-import { solve, solveMinRounds, evaluate, bounds, groupSizes } from './solver.js';
+import './solver.js';
+
+const { solve, solveMinRounds, evaluate, bounds, groupSizes, scoreBound } = globalThis.Solver;
 
 function check(name, plan, n, k, cat, maxMeet) {
   const s = evaluate(plan, n, cat);
@@ -20,6 +22,12 @@ assert.deepEqual(groupSizes(25, 4), [5, 4, 4, 4, 4, 4]);
 assert.equal(bounds(24, 6).coverRounds, 5);
 assert.equal(bounds(24, 6).hostRounds, 6);
 assert.equal(bounds(24, 4, Array.from({ length: 24 }, (_, i) => (i < 5 ? 0 : -1))).coverRounds, 14);
+
+// 24/6/6 has 120 pairs repeated across round pairs; the best spread is 12 pairs twice and 36 three times.
+assert.equal(scoreBound(24, 6, 6), 300);
+assert.equal(scoreBound(15, 3, 7), 0);
+const s24 = evaluate(solve({ n: 24, k: 4, rounds: 10 }), 24);
+assert.ok(s24.score >= scoreBound(24, 4, 10), 'score respects its bound');
 
 // Kirkman's schoolgirl problem: every pair meets exactly once.
 check('kirkman 15/3', solve({ n: 15, k: 3, rounds: 7 }), 15, 3, null, 1);

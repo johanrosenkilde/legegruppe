@@ -4,91 +4,388 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Legegrupper</title>
-<link rel="icon" href="data:,">
+<meta name="description" content="Lav en plan for klassens legegrupper, så alle børn kommer i gruppe med alle de andre, og hvert barn er vært på skift.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 15 16 5l12 10v13H4z' fill='%231F3A8A'/%3E%3Crect x='13' y='19' width='6' height='9' fill='%23FFE45C'/%3E%3C/svg%3E">
 <style>
-  :root { --fg: #1d2330; --muted: #5d6675; --line: #d9dde3; --bg: #f7f7f5; --accent: #2f6f5e; }
+  @font-face { font-family: 'Shantell Sans'; src: url(fonts/shantell.woff2) format('woff2'); font-weight: 300 800; font-display: swap; }
+  @font-face { font-family: 'Atkinson Hyperlegible'; src: url(fonts/atkinson-400.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Atkinson Hyperlegible'; src: url(fonts/atkinson-700.woff2) format('woff2'); font-weight: 700; font-display: swap; }
+
+  :root {
+    --paper: #FBFCFE;
+    --grid: #E3EAF4;
+    --ink: #1F3A8A;
+    --text: #1B2333;
+    --muted: #5A6476;
+    --margin: #E0584C;
+    --marker: #FFE45C;
+    --line: #D5DDEA;
+    --hand: 'Shantell Sans', 'Comic Sans MS', cursive;
+    --body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
-  main { max-width: 64rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-  header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
-  h1 { margin: 0 0 .25rem; font-size: 1.75rem; }
-  h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
-  p.lead { margin: 0 0 1.5rem; color: var(--muted); }
-  form { display: grid; grid-template-columns: 1fr 16rem; gap: 1rem 1.5rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 1rem; }
-  label { display: block; font-weight: 600; margin-bottom: .25rem; }
-  .hint { font-size: .85rem; color: var(--muted); font-weight: normal; }
-  textarea { width: 100%; min-height: 18rem; font: inherit; padding: .5rem; border: 1px solid var(--line); border-radius: 6px; }
-  input[type=number] { width: 6rem; font: inherit; padding: .3rem .4rem; border: 1px solid var(--line); border-radius: 6px; }
-  .side > div { margin-bottom: 1rem; }
-  .check { display: flex; gap: .5rem; align-items: flex-start; font-weight: normal; }
-  .buttons { grid-column: 1 / -1; display: flex; gap: .5rem; flex-wrap: wrap; }
-  button { font: inherit; padding: .45rem .9rem; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
-  button.primary { background: var(--accent); color: #fff; }
-  button:disabled { opacity: .5; cursor: progress; }
-  #lang { border-color: var(--line); color: var(--fg); }
-  .summary { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .75rem 1rem; }
-  .summary ul { margin: .25rem 0; padding-left: 1.2rem; }
-  .warn { color: #8a4b00; }
-  .rounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem; }
-  .round { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .75rem; }
-  .round h3 { margin: .25rem 0 .5rem; font-size: 1rem; }
-  .round ol { margin: 0; padding-left: 1.4rem; }
-  .round li { margin-bottom: .4rem; }
-  .host { font-weight: 700; }
-  .matrix { overflow-x: auto; }
-  .matrix table { border-collapse: collapse; font-size: .75rem; }
-  .matrix th, .matrix td { border: 1px solid var(--line); min-width: 1.6rem; height: 1.6rem; text-align: center; padding: 0 .2rem; }
-  .matrix th[scope=row] { text-align: right; white-space: nowrap; font-weight: normal; }
-  .c0 { background: #f3c9c4; } .c1 { background: #d6ecd9; } .c2 { background: #f5e7b8; } .c3 { background: #efc48f; }
-  @media (max-width: 40rem) { form { grid-template-columns: 1fr; } }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font: 17px/1.55 var(--body);
+    color: var(--text);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  main { max-width: 68rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+
+  /* Masthead */
+  .masthead { position: relative; padding: 1.5rem 0 1rem; }
+  .masthead h1 {
+    font: 700 clamp(2.8rem, 8vw, 4.6rem)/1 var(--hand);
+    color: var(--ink);
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  .marked {
+    background: linear-gradient(100deg, transparent 0 2%, var(--marker) 3% 96%, transparent 97%) 0 62% / 100% 58% no-repeat;
+    padding: 0 .15em;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .lead { font-size: 1.2rem; max-width: 38rem; margin: 0; }
+  #lang {
+    position: absolute; top: 1.5rem; right: 0;
+    font: 700 .9rem var(--body); color: var(--ink);
+    background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: .35rem .9rem; cursor: pointer;
+  }
+  #lang:hover { border-color: var(--ink); }
+
+  /* Guide */
+  .guide { margin: 2rem 0; }
+  .guide h2, .results h2 { font: 700 1.6rem/1.2 var(--hand); color: var(--ink); margin: 0 0 .75rem; }
+  .guide ol { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+  .guide li { counter-increment: step; position: relative; padding: .9rem 1rem .9rem 3.4rem; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+  .guide li::before {
+    content: counter(step);
+    position: absolute; left: .9rem; top: .75rem;
+    width: 1.9rem; height: 1.9rem; border-radius: 50%;
+    display: grid; place-items: center;
+    font: 700 1.1rem var(--hand); color: var(--ink); background: var(--marker);
+  }
+  .guide b { display: block; }
+  .guide span { color: var(--muted); font-size: .95rem; }
+
+  /* Form sheet: a notebook page with a red margin line */
+  .sheet {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 1px 0 var(--line), 0 12px 30px -18px rgba(31, 58, 138, .35);
+    padding: 1.5rem 1.5rem 1.5rem 3.25rem;
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1.5rem 2.5rem;
+  }
+  .sheet::before { content: ''; position: absolute; top: 0; bottom: 0; left: 2rem; width: 2px; background: var(--margin); opacity: .75; }
+  .field { margin: 0 0 1.25rem; border: 0; padding: 0; min-width: 0; }
+  .field:last-child { margin-bottom: 0; }
+  label, .label { font-weight: 700; display: block; margin-bottom: .35rem; }
+  .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .count { font: 600 .95rem var(--hand); color: var(--ink); }
+  .hint { font-size: .9rem; color: var(--muted); margin: .4rem 0 0; }
+  textarea, input[type=number] {
+    font: inherit; color: var(--text);
+    border: 1.5px solid var(--line); border-radius: 8px; background: #fff;
+  }
+  textarea:focus, input[type=number]:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px rgba(31, 58, 138, .15); }
+  textarea {
+    width: 100%; min-height: 20rem; resize: vertical; padding: .4rem .75rem;
+    line-height: 1.6rem;
+    background: #fff linear-gradient(transparent calc(1.6rem - 1px), var(--grid) 0) 0 .4rem / 100% 1.6rem local;
+  }
+  input[type=number] { width: 7rem; padding: .45rem .6rem; }
+  .check { display: flex; gap: .6rem; align-items: flex-start; }
+  .check input { width: 1.15rem; height: 1.15rem; margin: .2rem 0 0; accent-color: var(--ink); flex: none; }
+  details.seed summary { cursor: pointer; color: var(--muted); font-size: .95rem; }
+  details.seed[open] summary { margin-bottom: .5rem; }
+
+  .actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; border-top: 1px dashed var(--line); padding-top: 1.25rem; }
+  button.btn {
+    font: 700 1rem var(--body); cursor: pointer;
+    padding: .7rem 1.25rem; border-radius: 10px;
+    border: 2px solid var(--ink); background: #fff; color: var(--ink);
+    transition: transform .08s ease, background-color .15s ease;
+  }
+  button.btn:hover { background: #EEF2FB; }
+  button.btn:active { transform: translateY(1px); }
+  button.btn.primary { background: var(--ink); color: #fff; }
+  button.btn.primary:hover { background: #172E70; }
+  button.btn:disabled { opacity: .55; cursor: progress; }
+  button.link { font: inherit; font-size: .95rem; color: var(--ink); background: none; border: 0; padding: 0; margin-top: .6rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Results */
+  .results { margin-top: 2.5rem; }
+  .empty { font: 500 1.2rem var(--hand); color: var(--muted); text-align: center; padding: 2.5rem 1rem; border: 2px dashed var(--line); border-radius: 12px; background: rgba(255, 255, 255, .6); margin: 0; }
+  .error { color: #A3271C; font-weight: 700; }
+  .score { display: flex; gap: 1.25rem; align-items: center; margin: 0 0 1rem; padding: 1rem 1.25rem; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+  .score-num { margin: 0; font: 700 3rem/1 var(--hand); color: var(--ink); text-align: center; min-width: 6rem; }
+  .score-num span { display: block; font: 400 .85rem var(--body); color: var(--muted); margin-top: .3rem; }
+  .score-text { margin: 0; font-weight: 700; }
+  .score .hint { margin-top: .2rem; }
+  .facts { list-style: none; margin: 0 0 1.5rem; padding: 1rem 1.25rem; background: #fff; border: 1px solid var(--line); border-radius: 12px; display: grid; gap: .45rem; }
+  .facts li { display: flex; gap: .6rem; align-items: baseline; }
+  .facts li::before { content: ''; flex: none; width: 1.3rem; height: 1.3rem; border-radius: 50%; display: inline-grid; place-items: center; font-size: .8rem; font-weight: 700; background: #DDF1E3; color: #1E6B3A; transform: translateY(.1rem); }
+  .facts li.ok::before { background: #DDF1E3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5 7 11.5 12.5 5' fill='none' stroke='%231E6B3A' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat; }
+  .facts li.info::before { content: 'i'; background: #E6ECF8; color: var(--ink); }
+  .facts li.warn::before { content: '!'; background: #FCE3D6; color: #A3271C; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; margin: 0 0 1rem; }
+  .toolbar .buttons { display: flex; gap: .5rem; }
+  .follow { margin: 0; color: var(--muted); }
+  .follow strong { color: var(--text); }
+
+  .rounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 1rem; }
+  .round { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .9rem 1rem 1rem; }
+  .round h3 { font: 700 1.25rem var(--hand); color: var(--ink); margin: 0 0 .6rem; }
+  .round-label {
+    width: 100%; margin: -.2rem 0 .6rem; padding: .3rem .5rem;
+    font: inherit; font-size: .95rem; color: var(--text);
+    border: 1px dashed var(--line); border-radius: 6px; background: #fff;
+  }
+  .round-label:hover { border-color: var(--muted); }
+  .round-label:focus { border-style: solid; border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px rgba(31, 58, 138, .15); }
+  .round-label:placeholder-shown { background: #FAFBFD; }
+  .round-no { margin: 0; font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .share { margin: 0 0 1rem; padding: 1rem 1.25rem; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+  .share-row { display: flex; gap: .5rem; }
+  .share-row input { flex: 1; min-width: 0; font: .9rem var(--body); padding: .55rem .6rem; border: 1.5px solid var(--line); border-radius: 8px; color: var(--muted); }
+  .share a { display: inline-block; margin-top: .5rem; color: var(--ink); text-underline-offset: 3px; }
+  .own-plan { text-align: center; margin: 2rem 0 0; }
+  .own-plan a { color: var(--ink); font-weight: 700; text-underline-offset: 3px; }
+  body.view .lead, body.view .privacy, body.view .guide, body.view .sheet, body.view details.math { display: none; }
+  body.view .masthead h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); }
+  body.view .results { margin-top: 1.5rem; }
+  .group { padding: .55rem 0; border-top: 1px solid var(--grid); }
+  .group:first-of-type { border-top: 0; padding-top: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: .3rem .35rem; }
+  .chip {
+    font: inherit; font-size: .92rem; color: var(--text);
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .05rem .45rem .05rem .35rem; border-radius: 6px;
+    background: #F3F6FB; border: 1px solid transparent; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--line); }
+  .chip .dot { width: .6rem; height: .6rem; border-radius: 50%; flex: none; }
+  .chip.host { font-weight: 700; background: #E8EDF9; }
+  .chip.host svg { width: .95rem; height: .95rem; fill: var(--ink); flex: none; }
+  .chip .cat { color: var(--muted); font-size: .8rem; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .follow svg { width: .95rem; height: .95rem; fill: var(--ink); vertical-align: -2px; }
+  .chip.hl { background: var(--marker); border-color: #E8C400; }
+  .rounds.following .chip:not(.hl) { opacity: .55; }
+  .rounds.following .group.has-hl .chip { opacity: 1; }
+
+  details.panel { margin-top: 1rem; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .9rem 1rem; }
+  details.panel summary { font-weight: 700; cursor: pointer; color: var(--ink); }
+  .rounds + details.panel { margin-top: 1.5rem; }
+  details.math { margin-top: 2.5rem; }
+  .math p { max-width: 42rem; margin: .75rem 0 0; }
+  .math a { color: var(--ink); text-underline-offset: 3px; }
+  .math-body { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 0 2.5rem; }
+  .math-body > [data-lang] { grid-row: 1; grid-column: 1; }
+  .figure { grid-row: 1; grid-column: 2; margin: .75rem 0 0; }
+  .design { display: block; width: 100%; max-width: 20rem; height: auto; }
+  .design polygon { fill: none; stroke-width: 2.2; stroke-linejoin: round; transition: opacity .15s ease; }
+  .design circle { fill: #fff; stroke: var(--text); stroke-width: 2; }
+  .design text { font: 700 15px var(--body); text-anchor: middle; dominant-baseline: central; fill: var(--text); }
+  .design[data-show] g[class^=r] { opacity: .1; }
+  .design[data-show="1"] g.r1, .design[data-show="2"] g.r2, .design[data-show="3"] g.r3, .design[data-show="4"] g.r4 { opacity: 1; }
+  .design[data-show] polygon { stroke-width: 3; }
+  .fig-legend { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .25rem; font-size: .9rem; }
+  .fig-legend button { font: inherit; font-weight: 700; color: var(--text); background: none; border: 1px solid transparent; border-radius: 6px; padding: .1rem .4rem; cursor: pointer; }
+  .fig-legend button:hover, .fig-legend button[aria-pressed=true] { border-color: var(--line); background: #F3F6FB; }
+  .fig-legend .sw { display: inline-block; width: 1.1rem; height: 3px; border-radius: 2px; margin-right: .4rem; vertical-align: middle; }
+  .fig-legend li:nth-child(1) .sw { background: #1F3A8A; } .fig-legend li:nth-child(2) .sw { background: #E0584C; }
+  .fig-legend li:nth-child(3) .sw { background: #C99700; } .fig-legend li:nth-child(4) .sw { background: #2E8B57; }
+  .fig-legend .grps { color: var(--muted); letter-spacing: .03em; }
+  .figure figcaption { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+  @media (max-width: 46rem) { .math-body { grid-template-columns: 1fr; } .figure { grid-row: 2; grid-column: 1; } }
+  .table-wrap { overflow-x: auto; margin-top: .75rem; }
+  .hosts table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .hosts th, .hosts td { text-align: left; padding: .2rem 1.25rem .2rem 0; border-bottom: 1px solid var(--grid); }
+  .hosts thead th, .hosts tr:first-child th { font-size: .85rem; color: var(--muted); }
+  .hosts th[scope=row] { font-weight: 400; }
+  .hosts th[scope=row] .link { margin: 0; text-decoration: none; color: var(--text); }
+  .hosts th[scope=row] .link:hover { text-decoration: underline; }
+  .hosts tr.hl th, .hosts tr.hl td { background: var(--marker); }
+  .matrix table { border-collapse: collapse; font-size: .75rem; font-variant-numeric: tabular-nums; }
+  .matrix th, .matrix td { border: 1px solid var(--grid); min-width: 1.6rem; height: 1.6rem; text-align: center; padding: 0 .2rem; }
+  .matrix th[scope=row] { text-align: right; white-space: nowrap; font-weight: 400; padding-right: .4rem; }
+  .matrix tr.hl th { background: var(--marker); }
+  .c0 { background: #F6CFC6; } .c1 { background: #DDF1E3; } .c2 { background: #FBEFC2; } .c3 { background: #F4CB95; }
+  .legend { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+  .legend span::before { content: ''; display: inline-block; width: .8rem; height: .8rem; margin-right: .3rem; vertical-align: -1px; border-radius: 2px; }
+  .legend .l0::before { background: #F6CFC6; } .legend .l1::before { background: #DDF1E3; } .legend .l2::before { background: #FBEFC2; } .legend .l3::before { background: #F4CB95; }
+
+  .privacy {
+    display: flex; gap: .75rem; align-items: center;
+    max-width: 38rem; margin: 1.25rem 0 0; padding: .7rem 1rem;
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    color: var(--text);
+  }
+  .privacy span { white-space: pre-line; }
+  .privacy svg { width: 1.5rem; height: 1.5rem; flex: none; fill: var(--ink); }
+
+  @media (max-width: 46rem) {
+    .sheet { grid-template-columns: 1fr; padding-left: 2.5rem; }
+    .sheet::before { left: 1.4rem; }
+    #lang { position: static; display: block; margin: 0 0 1rem auto; }
+    .masthead { padding-top: .5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   @media print {
-    form, header button, .no-print { display: none !important; }
-    body { background: #fff; }
+    body { background: #fff; font-size: 12px; }
+    .masthead .lead, #lang, .guide, .sheet, .toolbar, details.panel, .privacy, .facts, .score { display: none !important; }
+    .masthead h1 { font-size: 2rem; }
     .round { break-inside: avoid; }
+    .round-label { border: 0; padding: 0; background: none; font-weight: 700; }
+    .round-label:placeholder-shown, .share, .own-plan { display: none; }
+    .rounds.following .chip { opacity: 1; }
   }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <div>
-      <h1 data-t="title"></h1>
-    </div>
-    <button id="lang" type="button"></button>
+  <header class="masthead">
+    <button id="lang" type="button" lang="en">English</button>
+    <h1><span class="marked" data-t="title">Legegrupper</span></h1>
+    <p class="lead" data-t="lead">Lav en plan for klassens legegrupper, så alle børn kommer i gruppe med alle de andre, og hvert barn er vært på skift.</p>
+    <p class="privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5zm-1.2 15.2-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z"/></svg><span data-t="privacy">Alt beregnes i din browser: navnene bliver ikke sendt nogen steder.
+AI er ikke involveret i beregningen – kun matematik.</span></p>
   </header>
-  <p class="lead" data-t="lead"></p>
 
-  <form id="form">
+  <section class="guide" aria-labelledby="guide-title">
+    <h2 id="guide-title" data-t="guideTitle">Sådan gør du</h2>
+    <ol>
+      <li><b data-t="g1t">Skriv klassen ind</b> <span data-t="g1">Skriv ét navn per linje, eller prøv med en eksempel-klasse.</span></li>
+      <li><b data-t="g2t">Vælg gruppestørrelse</b> <span data-t="g2">Hvis antallet ikke går op, får nogle grupper et barn mere.</span></li>
+      <li><b data-t="g3t">Lav planen</b> <span data-t="g3">Værktøjet finder det mindste antal runder, hvor alle har været i gruppe med alle. En runde kan fx være en måned.</span></li>
+      <li><b data-t="g4t">Del eller udskriv</b> <span data-t="g4">Adressen i browseren gemmer planen, så du kan sende den som et link.</span></li>
+    </ol>
+  </section>
+
+  <form id="form" class="sheet" novalidate>
+    <div class="field">
+      <div class="label-row">
+        <label for="names" data-t="names">Klassen</label>
+        <span class="count" id="count" aria-live="polite"></span>
+      </div>
+      <textarea id="names" spellcheck="false" autocomplete="off" data-tp="namesPlaceholder" placeholder="Ida&#10;Noah&#10;Freja&#10;Oscar"></textarea>
+      <p class="hint" data-t="namesHint">Skriv ét navn per linje. Vil du bruge kategorireglen, så skriv kategorien efter et komma, fx "Ida, A".</p>
+      <button type="button" id="example" class="link" data-t="example">Prøv med en eksempel-klasse</button>
+    </div>
+
     <div>
-      <label for="names"><span data-t="names"></span> <span class="hint" data-t="namesHint"></span></label>
-      <textarea id="names" spellcheck="false"></textarea>
-    </div>
-    <div class="side">
-      <div>
-        <label for="k" data-t="k"></label>
-        <input id="k" type="number" min="2" value="4">
+      <div class="field">
+        <label for="k" data-t="k">Børn per gruppe</label>
+        <input id="k" type="number" min="2" max="20" value="4">
+        <p class="hint" data-t="kHint">Nogle grupper kan få et barn mere.</p>
       </div>
-      <div>
-        <label for="rounds"><span data-t="rounds"></span> <span class="hint" data-t="roundsHint"></span></label>
-        <input id="rounds" type="number" min="1">
+      <div class="field">
+        <label for="rounds" data-t="rounds">Antal runder</label>
+        <input id="rounds" type="number" min="1" max="60" data-tp="auto" placeholder="Automatisk">
+        <p class="hint" data-t="roundsHint">Lad feltet stå tomt for at få det mindste antal runder, hvor alle mødes.</p>
       </div>
-      <div>
-        <label class="check"><input id="cat" type="checkbox"> <span data-t="catRule"></span></label>
-        <div class="hint" data-t="catHint"></div>
-      </div>
-      <div>
-        <label for="seed" data-t="seed"></label>
+      <fieldset class="field">
+        <legend class="label" data-t="catTitle">Kategorier</legend>
+        <label class="check" style="font-weight:400"><input id="cat" type="checkbox"> <span data-t="catRule">Ingen er alene om sin kategori i en gruppe</span></label>
+        <p class="hint" data-t="catHint">Hver gruppe har enten ingen eller mindst to børn fra hver kategori. Børn uden kategori tæller ikke med.</p>
+      </fieldset>
+      <details class="field seed">
+        <summary data-t="seedTitle">Avanceret: seed</summary>
+        <label for="seed" data-t="seed">Seed</label>
         <input id="seed" type="number" min="1" value="1">
-      </div>
+        <p class="hint" data-t="seedHint">Det samme seed giver den samme plan.</p>
+      </details>
     </div>
-    <div class="buttons">
-      <button class="primary" type="submit" data-t="make"></button>
-      <button id="reseed" type="button" data-t="another"></button>
+
+    <div class="actions">
+      <button class="btn primary" type="submit" data-t="make">Lav plan</button>
+      <button class="btn" id="reseed" type="button" data-t="another">Lav et nyt forslag</button>
+      <button class="btn" id="thorough" type="button" data-t="thorough">Søg grundigere</button>
     </div>
   </form>
 
-  <div id="out"></div>
+  <section class="results" aria-labelledby="results-title">
+    <h2 id="results-title" data-t="plan">Planen</h2>
+    <div id="out" aria-live="polite">
+      <p class="empty" data-t="empty">Planen kommer til at stå her, når du har skrevet klassen ind.</p>
+    </div>
+  </section>
+
+  <details class="panel math">
+    <summary data-t="mathTitle">Hvordan virker matematikken?</summary>
+    <div class="math-body">
+      <figure class="figure">
+        <svg class="design" id="design" viewBox="0 0 320 320" role="img" aria-labelledby="design-title">
+        <title id="design-title" data-t="figTitle">9 børn i grupper af 3 over 4 runder</title>
+        <g class="r1" stroke="#1F3A8A" fill="#1F3A8A">
+        <polygon points="160.0,42.0 235.8,69.6 200.4,270.9"/>
+        <polygon points="276.2,139.5 119.6,270.9 84.2,69.6"/>
+        <polygon points="57.8,219.0 262.2,219.0 43.8,139.5"/>
+        </g>
+        <g class="r2" stroke="#E0584C" fill="#E0584C">
+        <polygon points="160.0,42.0 276.2,139.5 57.8,219.0"/>
+        <polygon points="235.8,69.6 119.6,270.9 262.2,219.0"/>
+        <polygon points="200.4,270.9 84.2,69.6 43.8,139.5"/>
+        </g>
+        <g class="r3" stroke="#C99700" fill="#C99700">
+        <polygon points="160.0,42.0 119.6,270.9 43.8,139.5"/>
+        <polygon points="276.2,139.5 262.2,219.0 200.4,270.9"/>
+        <polygon points="57.8,219.0 235.8,69.6 84.2,69.6"/>
+        </g>
+        <g class="r4" stroke="#2E8B57" fill="#2E8B57">
+        <polygon points="160.0,42.0 262.2,219.0 84.2,69.6"/>
+        <polygon points="276.2,139.5 235.8,69.6 43.8,139.5"/>
+        <polygon points="57.8,219.0 119.6,270.9 200.4,270.9"/>
+        </g>
+        <circle cx="160.0" cy="42.0" r="6"/><text x="160.0" y="20.0">A</text>
+        <circle cx="235.8" cy="69.6" r="6"/><text x="250.0" y="52.8">B</text>
+        <circle cx="200.4" cy="270.9" r="6"/><text x="207.9" y="291.6">C</text>
+        <circle cx="276.2" cy="139.5" r="6"/><text x="297.9" y="135.7">D</text>
+        <circle cx="119.6" cy="270.9" r="6"/><text x="112.1" y="291.6">E</text>
+        <circle cx="84.2" cy="69.6" r="6"/><text x="70.0" y="52.8">F</text>
+        <circle cx="57.8" cy="219.0" r="6"/><text x="38.8" y="230.0">G</text>
+        <circle cx="262.2" cy="219.0" r="6"/><text x="281.2" y="230.0">H</text>
+        <circle cx="43.8" cy="139.5" r="6"/><text x="22.1" y="135.7">I</text>
+        </svg>
+        <ul class="fig-legend">
+          <li><button type="button" data-r="1"><span class="sw"></span><span data-t="round">Runde</span> 1</button> <span class="grps">ABC · DEF · GHI</span></li>
+          <li><button type="button" data-r="2"><span class="sw"></span><span data-t="round">Runde</span> 2</button> <span class="grps">ADG · BEH · CFI</span></li>
+          <li><button type="button" data-r="3"><span class="sw"></span><span data-t="round">Runde</span> 3</button> <span class="grps">AEI · BFG · CDH</span></li>
+          <li><button type="button" data-r="4"><span class="sw"></span><span data-t="round">Runde</span> 4</button> <span class="grps">AFH · BDI · CEG</span></li>
+        </ul>
+        <figcaption>
+          <span data-lang="da" lang="da">9 børn i grupper af 3 over 4 runder. Hver trekant er en gruppe, og hver farve er en runde. Hvert af de 36 par er forbundet med præcis én streg, så alle mødes præcis én gang. Peg på eller tryk på en runde for at se den alene.</span>
+          <span data-lang="en" lang="en" hidden>9 children in groups of 3 over 4 rounds. Each triangle is a group, and each colour is a round. Each of the 36 pairs is joined by exactly one line, so everyone meets exactly once. Point at or tap a round to see it alone.</span>
+        </figcaption>
+      </figure>
+    <div data-lang="da" lang="da">
+      <p>Opgaven er et velkendt problem i matematikken. Den hører under <a href="https://en.wikipedia.org/wiki/Combinatorial_design">kombinatoriske designs</a>, som handler om at vælge delmængder af en mængde, så bestemte par optræder sammen et bestemt antal gange.</p>
+      <p>Et klassisk eksempel er Kirkmans skolepigeproblem fra 1850. 15 piger går tur hver dag i en uge, tre og tre ved siden af hinanden. Kan turene ordnes, så hver pige har gået ved siden af hver af de andre præcis én gang? Svaret er ja. Legegrupper er det samme problem: hver runde deler klassen i grupper, og alle par skal mødes.</p>
+      <p>Perfekte designs, hvor alle par mødes præcis én gang, findes kun for bestemte klasse- og gruppestørrelser. I de fleste klasser må nogle par mødes mere end én gang. Spørgsmålet er så, hvordan gentagelserne fordeles bedst.</p>
+      <p>Værktøjet starter med tilfældige grupper og forbedrer dem ved at bytte to børn i samme runde, mange tusinde gange. Hvert bytte vurderes med strafpoint. Metoden hedder <i>simulated annealing</i>. I starten accepterer søgningen også bytter, der gør planen lidt værre, så den ikke sidder fast. Til sidst accepterer den kun forbedringer. Bagefter fordeles værterne, så alle er vært lige mange gange, spredt over runderne.</p>
+      <p>Værktøjet beregner også en nedre grænse for strafpoint, som ingen plan kan komme under. Grænsen bygger på, at to runder altid har nogle par til fælles: når grupperne fra to runder krydses, må nogle af fællesmængderne indeholde mindst to børn. Når planen rammer grænsen, kan den ikke blive bedre.</p>
+    </div>
+    <div data-lang="en" lang="en" hidden>
+      <p>The task is a well-known problem in mathematics. It belongs to <a href="https://en.wikipedia.org/wiki/Combinatorial_design">combinatorial designs</a>, which are about choosing subsets of a set so that certain pairs appear together a certain number of times.</p>
+      <p>A classic example is Kirkman's schoolgirl problem from 1850. 15 girls walk out every day for a week, three abreast. Can the walks be arranged so that each girl has walked beside every other girl exactly once? The answer is yes. Play groups are the same problem: each round splits the class into groups, and every pair should meet.</p>
+      <p>Perfect designs, where every pair meets exactly once, exist only for certain class and group sizes. In most classes, some pairs must meet more than once. The question is then how best to spread the repeats.</p>
+      <p>The tool starts with random groups and improves them by swapping two children in the same round, many thousands of times. Each swap is judged by penalty points. The method is called <i>simulated annealing</i>. At first, the search also accepts swaps that make the plan slightly worse, so it doesn't get stuck. At the end, it accepts only improvements. Afterwards, the hosts are assigned so that everyone hosts equally often, spread over the rounds.</p>
+      <p>The tool also computes a lower bound on the penalty points that no plan can get below. The bound rests on the fact that two rounds always share some pairs: when the groups of two rounds are intersected, some intersections must contain at least two children. When a plan reaches the bound, it can't get any better.</p>
+    </div>
+    </div>
+  </details>
+
 </main>
-<script type="module" src="app.js"></script>
+<script src="solver.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 // Play group planner: R rounds, each a partition of n children into groups of about k.
 // Groups are found by simulated annealing over swaps within a round; hosts are assigned afterwards.
-
-export function mulberry32(seed) {
+// Classic script, so the page also works from file://. Exposes globalThis.Solver.
+(() => {
+function mulberry32(seed) {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
@@ -12,7 +13,7 @@ export function mulberry32(seed) {
   };
 }
 
-export function groupSizes(n, k) {
+function groupSizes(n, k) {
   const g = Math.max(1, Math.floor(n / k));
   const base = Math.floor(n / g), extra = n % g;
   return Array.from({ length: g }, (_, i) => base + (i < extra ? 1 : 0));
@@ -20,7 +21,7 @@ export function groupSizes(n, k) {
 
 // coverRounds: fewest rounds in which every pair can meet. hostRounds: rounds needed for n hosts.
 // With categories, a category of m children meets the other n - m children at most `cross` times per round.
-export function bounds(n, k, cat = null) {
+function bounds(n, k, cat = null) {
   const sizes = groupSizes(n, k);
   let coverRounds = sizes[0] > 1 ? Math.ceil((n - 1) / (sizes[0] - 1)) : Infinity;
   const lonely = [];
@@ -41,7 +42,7 @@ export function bounds(n, k, cat = null) {
 }
 
 // Smallest number of rounds, from the lower bound up, for which the solver covers every pair.
-export function solveMinRounds(opts, maxExtra = 5) {
+function solveMinRounds(opts, maxExtra = 5) {
   const b = bounds(opts.n, opts.k, opts.cat);
   const first = Math.max(b.coverRounds, Math.ceil(b.hostRounds));
   let plan;
@@ -219,7 +220,7 @@ function assignHosts(members, n, rand, iters) {
 }
 
 // Returns rounds[r] = [{ host, members }], with the host first in members.
-export function solve({ n, k, rounds: R, cat = null, seed = 1, iterations = 500000, restarts = 3 }) {
+function solve({ n, k, rounds: R, cat = null, seed = 1, iterations = 500000, restarts = 3 }) {
   const rand = mulberry32(seed);
   const sizes = groupSizes(n, k);
   let members, bestCost = Infinity;
@@ -234,7 +235,7 @@ export function solve({ n, k, rounds: R, cat = null, seed = 1, iterations = 5000
   return plan;
 }
 
-export function evaluate(plan, n, cat = null) {
+function evaluate(plan, n, cat = null) {
   const meet = Array.from({ length: n }, () => new Array(n).fill(0));
   const hosts = new Array(n).fill(0);
   let alone = 0;
@@ -247,10 +248,46 @@ export function evaluate(plan, n, cat = null) {
       alone += Object.values(per).filter(c => c === 1).length;
     }
   }
-  let unmet = 0, maxMeet = 0;
+  let unmet = 0, maxMeet = 0, score = 0;
   for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
     if (meet[a][b] === 0) unmet++;
     maxMeet = Math.max(maxMeet, meet[a][b]);
+    score += pairCost(meet[a][b]);
   }
-  return { meet, hosts, unmet, maxMeet, alone };
+  return { meet, hosts, unmet, maxMeet, alone, score };
 }
+
+// Lower bound on the score of any plan with R rounds. Let x_c be the number of pairs meeting c times.
+// Every plan satisfies Σx_c = C(n,2) and Σ c·x_c = R·Σ C(s,2). Two rounds share at least `shared` pairs,
+// since their G² group intersections sum to n, so Σ C(c,2)·x_c ≥ C(R,2)·shared.
+// The bound is the optimum of this linear program, found by trying every basis of two or three columns.
+function scoreBound(n, k, R) {
+  const sizes = groupSizes(n, k), G = sizes.length;
+  const C2 = x => (x * (x - 1)) / 2;
+  const P = C2(n), M = R * sizes.reduce((sum, x) => sum + C2(x), 0);
+  const q = Math.floor(n / (G * G)), rem = n % (G * G);
+  const B = C2(R) * (rem * C2(q + 1) + (G * G - rem) * C2(q));
+  const eps = 1e-9;
+  let best = Infinity;
+  const tryBasis = (cs, xs) => {
+    if (xs.some(x => x < -eps)) return;
+    if (cs.reduce((sum, c, i) => sum + C2(c) * xs[i], 0) < B - eps) return;
+    best = Math.min(best, cs.reduce((sum, c, i) => sum + pairCost(c) * xs[i], 0));
+  };
+  for (let a = 0; a <= R; a++) for (let b = a + 1; b <= R; b++) {
+    const xb = (M - a * P) / (b - a);
+    tryBasis([a, b], [P - xb, xb]);
+    for (let c = b + 1; c <= R; c++) {
+      // Solve [1 1 1; a b c; C2(a) C2(b) C2(c)] x = [P; M; B] by Cramer's rule.
+      const m = [[1, 1, 1], [a, b, c], [C2(a), C2(b), C2(c)]], rhs = [P, M, B];
+      const det = A => A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) - A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) + A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+      const D = det(m);
+      if (Math.abs(D) < eps) continue;
+      tryBasis([a, b, c], [0, 1, 2].map(j => det(m.map((row, i) => row.map((v, jj) => (jj === j ? rhs[i] : v)))) / D));
+    }
+  }
+  return Math.max(0, Math.ceil(best - eps));
+}
+
+globalThis.Solver = { mulberry32, groupSizes, bounds, solve, solveMinRounds, evaluate, scoreBound };
+})();
