@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legegrupper</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --fg: #1d2330; --muted: #5d6675; --line: #d9dde3; --bg: #f7f7f5; --accent: #2f6f5e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  main { max-width: 64rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+  header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  h1 { margin: 0 0 .25rem; font-size: 1.75rem; }
+  h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
+  p.lead { margin: 0 0 1.5rem; color: var(--muted); }
+  form { display: grid; grid-template-columns: 1fr 16rem; gap: 1rem 1.5rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 1rem; }
+  label { display: block; font-weight: 600; margin-bottom: .25rem; }
+  .hint { font-size: .85rem; color: var(--muted); font-weight: normal; }
+  textarea { width: 100%; min-height: 18rem; font: inherit; padding: .5rem; border: 1px solid var(--line); border-radius: 6px; }
+  input[type=number] { width: 6rem; font: inherit; padding: .3rem .4rem; border: 1px solid var(--line); border-radius: 6px; }
+  .side > div { margin-bottom: 1rem; }
+  .check { display: flex; gap: .5rem; align-items: flex-start; font-weight: normal; }
+  .buttons { grid-column: 1 / -1; display: flex; gap: .5rem; flex-wrap: wrap; }
+  button { font: inherit; padding: .45rem .9rem; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: progress; }
+  #lang { border-color: var(--line); color: var(--fg); }
+  .summary { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .75rem 1rem; }
+  .summary ul { margin: .25rem 0; padding-left: 1.2rem; }
+  .warn { color: #8a4b00; }
+  .rounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem; }
+  .round { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .75rem; }
+  .round h3 { margin: .25rem 0 .5rem; font-size: 1rem; }
+  .round ol { margin: 0; padding-left: 1.4rem; }
+  .round li { margin-bottom: .4rem; }
+  .host { font-weight: 700; }
+  .matrix { overflow-x: auto; }
+  .matrix table { border-collapse: collapse; font-size: .75rem; }
+  .matrix th, .matrix td { border: 1px solid var(--line); min-width: 1.6rem; height: 1.6rem; text-align: center; padding: 0 .2rem; }
+  .matrix th[scope=row] { text-align: right; white-space: nowrap; font-weight: normal; }
+  .c0 { background: #f3c9c4; } .c1 { background: #d6ecd9; } .c2 { background: #f5e7b8; } .c3 { background: #efc48f; }
+  @media (max-width: 40rem) { form { grid-template-columns: 1fr; } }
+  @media print {
+    form, header button, .no-print { display: none !important; }
+    body { background: #fff; }
+    .round { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 data-t="title"></h1>
+    </div>
+    <button id="lang" type="button"></button>
+  </header>
+  <p class="lead" data-t="lead"></p>
+
+  <form id="form">
+    <div>
+      <label for="names"><span data-t="names"></span> <span class="hint" data-t="namesHint"></span></label>
+      <textarea id="names" spellcheck="false"></textarea>
+    </div>
+    <div class="side">
+      <div>
+        <label for="k" data-t="k"></label>
+        <input id="k" type="number" min="2" value="4">
+      </div>
+      <div>
+        <label for="rounds"><span data-t="rounds"></span> <span class="hint" data-t="roundsHint"></span></label>
+        <input id="rounds" type="number" min="1">
+      </div>
+      <div>
+        <label class="check"><input id="cat" type="checkbox"> <span data-t="catRule"></span></label>
+        <div class="hint" data-t="catHint"></div>
+      </div>
+      <div>
+        <label for="seed" data-t="seed"></label>
+        <input id="seed" type="number" min="1" value="1">
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="primary" type="submit" data-t="make"></button>
+      <button id="reseed" type="button" data-t="another"></button>
+    </div>
+  </form>
+
+  <div id="out"></div>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

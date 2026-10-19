@@ -1,0 +1,80 @@
+# Legegrupper
+
+Et lille webværktøj, der laver en plan for legegrupper i en klasse. Planen består af et antal runder, fx én per måned. I hver runde bliver alle børn fordelt i grupper på cirka K børn, og hver gruppe har en vært.
+
+Værktøjet prøver at opnå tre ting:
+
+- Alle børn har været i gruppe med alle andre.
+- Hvert barn er vært lige mange gange, og værtskaberne er spredt ud over året.
+- Grupperne er så forskellige som muligt, så de samme børn sjældent mødes igen.
+
+Alt bliver beregnet i browseren, så navnene bliver ikke sendt til en server.
+
+## Sådan bruger du det
+
+1. Skriv børnenes navne, ét per linje.
+2. Vælg, hvor mange børn der cirka skal være i hver gruppe. Når antallet ikke går op, får nogle grupper ét barn mere.
+3. Vælg antal runder, eller lad feltet stå tomt. Så finder værktøjet det mindste antal runder, hvor alle har mødt alle.
+4. Klik **Lav plan**. Klik **Nyt forslag** for at få en anden plan med de samme indstillinger.
+
+Planen kan hentes som CSV eller udskrives. Adressen i browseren indeholder navne og indstillinger, så du kan gemme eller dele en plan som et link. Samme link og seed giver samme plan.
+
+### Kategorier
+
+Du kan give et barn en kategori ved at skrive den efter et komma, fx `Ida, A`. Hvis du slår **Ingen er alene om sin kategori i en gruppe** til, får hver gruppe enten ingen eller mindst to børn fra hver kategori. Børn uden kategori tæller ikke med.
+
+Reglen gør det sværere at nå rundt til alle. Hvis 5 børn har samme kategori, og grupperne har 4 børn, møder de 5 hver runde højst 7 af de andre børn. De skal møde 5 · 19 = 95 i alt, så planen kræver mindst 14 runder. Værktøjet viser den nedre grænse i overblikket.
+
+## Matematikken bag
+
+Hver runde er en opdeling af alle børn i grupper. En plan, hvor alle par mødes mindst én gang, hedder et *resolvable covering design*. Problemet er beslægtet med *Social Golfer Problem* og Kirkmans skolepigeproblem. I Kirkmans problem går 15 piger i grupper af 3 over 7 dage, og hvert par mødes præcis én gang.
+
+Med G grupper per runde og grupper på s børn gælder:
+
+- Et barn møder s − 1 andre per runde, så alle par kræver mindst ⌈(N − 1)/(s − 1)⌉ runder.
+- Hver runde har G værter. Hvis hvert barn skal være vært præcis én gang, skal planen have N/G runder.
+
+Begge krav kan kun opfyldes samtidig, når s(s − 1) ≥ N − 1, altså når grupperne har mindst cirka √N + 1 børn. Ellers bliver nogle børn vært flere gange end andre, men aldrig mere end én gang flere.
+
+### Algoritmen
+
+Grupperne bliver fundet med *simulated annealing*. Et træk bytter to børn i forskellige grupper i samme runde. Halvdelen af trækkene er målrettede: de flytter et barn ind i gruppen hos et barn, det endnu ikke har mødt. Omkostningen er summen over alle par:
+
+- 10 for et par, der aldrig mødes,
+- (c − 1)³ for et par, der mødes c gange,
+- 1000 hver gang et barn er alene om sin kategori i en gruppe.
+
+Værterne bliver fordelt bagefter med en tilsvarende søgning. Søgningen udjævner først antallet af værtskaber og spreder dem derefter i tid.
+
+Når antallet af runder ligger tæt på den nedre grænse, finder søgningen ikke altid en plan, hvor alle mødes. Det gælder fx for 24 børn i grupper af 4 med 8 runder, selvom litteraturen tyder på, at en sådan plan findes. Typisk er én eller to ekstra runder nok. Kendte eksakte konstruktioner som affine planer og Kirkman-systemer er ikke indbygget, men søgningen finder dem selv i små tilfælde (15/3/7 og 25/5/6).
+
+## Udvikling
+
+Værktøjet er en statisk side uden afhængigheder og uden build-trin:
+
+- `index.html` indeholder sidens opbygning og CSS.
+- `app.js` indeholder brugerfladen.
+- `solver.js` indeholder algoritmen.
+- `worker.js` kører algoritmen i baggrunden, så siden ikke fryser.
+
+Moduler kan ikke indlæses fra `file://`, så siden skal serveres lokalt:
+
+```sh
+python3 -m http.server
+```
+
+Åbn derefter <http://localhost:8000>.
+
+Kør testene med Node.js 18 eller nyere:
+
+```sh
+node test.js
+```
+
+### Udgivelse med GitHub Pages
+
+Vælg **Settings → Pages → Deploy from a branch** i repoet, og vælg `main` og mappen `/ (root)`.
+
+## Licens
+
+MIT. Se [LICENSE](LICENSE).
