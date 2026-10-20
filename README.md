@@ -10,6 +10,8 @@ Værktøjet prøver at opnå tre ting:
 
 Alt bliver beregnet i browseren, så navnene bliver ikke sendt til en server.
 
+Prøv det på <https://johanrosenkilde.github.io/legegruppe/>.
+
 ## Sådan bruger du det
 
 1. Skriv børnenes navne, ét per linje.
@@ -23,11 +25,16 @@ Adressen i browseren indeholder navne, indstillinger, plan og etiketter, så du 
 
 Indholdet står komprimeret og base64-kodet i adressen, så navnene ikke kan læses direkte. Det er ikke kryptering: alle med linket kan se planen. Indholdet står efter `#` i adressen, så browseren sender det ikke til serveren.
 
-### Kategorier
+### Mærker
 
-Du kan give et barn en kategori ved at skrive den efter et komma, fx `Ida, A`. Hvis du slår **Ingen er alene om sin kategori i en gruppe** til, får hver gruppe enten ingen eller mindst to børn fra hver kategori. Børn uden kategori tæller ikke med.
+Du kan give børn et fælles mærke ved at skrive det efter navnet med et komma, fx `Ida, A`. Slår du **Intet barn er alene med sit mærke i en gruppe** til, er et barn med et mærke aldrig det eneste med mærket i sin gruppe. En gruppe har altså enten ingen eller mindst to børn med samme mærke. Børn uden mærke tæller ikke med.
 
-Reglen gør det sværere at nå rundt til alle. Hvis 5 børn har samme kategori, og grupperne har 4 børn, møder de 5 hver runde højst 7 af de andre børn. De skal møde 5 · 19 = 95 i alt, så planen kræver mindst 14 runder. Værktøjet viser den nedre grænse i overblikket.
+Reglen kan kræve flere runder, før alle har mødt alle. Tag fx en klasse med 24 børn i grupper af 4, hvor 5 af børnene har mærket A. I hver runde skal de 5 fordeles med mindst to i hver gruppe, de er i, fx 2 i én gruppe og 3 i en anden:
+
+- I gruppen med 2 møder de hver 2 børn uden mærket. Det giver 2 · 2 = 4 møder.
+- I gruppen med 3 møder de hver 1 barn uden mærket. Det giver 3 · 1 = 3 møder.
+
+De 5 børn møder altså tilsammen højst 7 af de andre børn per runde. De skal møde hver af de 19 andre, i alt 5 · 19 = 95 møder, så planen kræver mindst 95 / 7 ≈ 14 runder. Uden reglen er 8 runder nok i princippet. Værktøjet viser den nedre grænse i overblikket.
 
 ## Matematikken bag
 
@@ -46,13 +53,13 @@ Grupperne bliver fundet med *simulated annealing*. Et træk bytter to børn i fo
 
 - 10 for et par, der aldrig mødes,
 - (c − 1)³ for et par, der mødes c gange,
-- 1000 hver gang et barn er alene om sin kategori i en gruppe.
+- 1000 hver gang et barn er alene med sit mærke i en gruppe.
 
 Planens samlede strafpoint er summen af de to første led. Siden viser strafpoint sammen med en nedre grænse, så du kan sammenligne forslag. Grænsen bygger på, at to runder altid har et vist antal par til fælles: deres G² gruppe-fællesmængder summerer til N, så nogle af dem indeholder mindst to børn. Det giver en ulighed for, hvor mange par der mødes flere gange. Grænsen er optimum af det lineære program, der følger af den ulighed og af det samlede antal møder.
 
 For 24 børn i 4 grupper af 6 over 6 runder giver det: antallet af par, der aldrig mødes, plus antallet af par, der mødes 3 gange, er mindst 36. Planen kan altså ikke både nå rundt til alle og undgå, at nogle par mødes 3 gange. Ingen plan kan komme under 300 strafpoint.
 
-Knappen **Søg grundigere** kører otte gange så mange skridt i søgningen.
+Knappen **Søg grundigere** starter én længere søgning per processorkerne, højst 8, som kører samtidig. Planen med færrest strafpoint bliver beholdt.
 
 Værterne bliver fordelt bagefter med en tilsvarende søgning. Søgningen udjævner først antallet af værtskaber og spreder dem derefter i tid.
 
@@ -75,10 +82,6 @@ Kør testene med Node.js 18 eller nyere:
 ```sh
 node test.js
 ```
-
-### Udgivelse med GitHub Pages
-
-Vælg **Settings → Pages → Deploy from a branch** i repoet, og vælg `main` og mappen `/ (root)`.
 
 ## Licens
 

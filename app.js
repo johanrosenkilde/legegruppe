@@ -13,7 +13,7 @@ const T = {
     g4t: 'Del eller udskriv', g4: 'Adressen i browseren gemmer planen, så du kan sende den som et link.',
     names: 'Klassen',
     namesPlaceholder: 'Ida\nNoah\nFreja\nOscar',
-    namesHint: 'Skriv ét navn per linje. Vil du bruge kategorireglen, så skriv kategorien efter et komma, fx "Ida, A".',
+    namesHint: 'Skriv ét navn per linje.',
     example: 'Prøv med en eksempel-klasse',
     count: n => (n === 1 ? '1 barn' : `${n} børn`),
     k: 'Børn per gruppe',
@@ -21,9 +21,11 @@ const T = {
     rounds: 'Antal runder',
     auto: 'Automatisk',
     roundsHint: 'Lad feltet stå tomt for at få det mindste antal runder, hvor alle mødes.',
-    catTitle: 'Kategorier',
-    catRule: 'Ingen er alene om sin kategori i en gruppe',
-    catHint: 'Hver gruppe har enten ingen eller mindst to børn fra hver kategori. Børn uden kategori tæller ikke med.',
+    catTitle: 'Mærker (valgfrit)',
+    catIntro: 'Giv børn et fælles mærke ved at skrive det efter navnet med et komma, fx "Ida, A". Så kan du sikre, at et barn med et mærke aldrig er det eneste med mærket i sin gruppe.',
+    catRule: 'Intet barn er alene med sit mærke i en gruppe',
+    catNone: 'Ingen børn har et mærke endnu.',
+    catFound: tags => `Mærker i klassen: ${tags.map(([c, m]) => `${c} (${m === 1 ? '1 barn' : `${m} børn`})`).join(', ')}.`,
     seedTitle: 'Avanceret: seed',
     seed: 'Seed',
     seedHint: 'Det samme seed giver den samme plan.',
@@ -42,7 +44,7 @@ const T = {
     badLink: 'Linket er ugyldigt eller ufuldstændigt. Bed om et nyt link.',
     mathTitle: 'Hvordan virker matematikken?',
     figTitle: '9 børn i grupper af 3 over 4 runder',
-    computingLong: 'Søger grundigt. Det kan tage op til et minut …',
+    computingLong: 'Søger grundigt. Det kan tage lidt tid …',
     scoreLabel: 'strafpoint',
     scoreText: b => `Lavere er bedre. Ingen plan med det antal runder kan komme under ${b}.`,
     scoreBest: 'Bedre kan det ikke blive med det antal runder.',
@@ -69,8 +71,8 @@ const T = {
     maxMeet: m => (m === 1 ? 'To børn er højst i gruppe sammen én gang.' : `To børn er højst i gruppe sammen ${m} gange.`),
     hosts: (lo, hi) => (lo === hi ? `Hvert barn er vært ${lo === 1 ? 'én gang' : `${lo} gange`}.` : `Hvert barn er vært ${lo} eller ${hi} gange.`),
     hostOnce: r => `Planen skal have ${r} runder, hvis hvert barn skal være vært præcis én gang.`,
-    alone: a => `${a} gange er et barn alene om sin kategori i en gruppe.`,
-    lonely: c => `Kategorien "${c}" har kun ét barn, så kategorireglen kan ikke overholdes.`,
+    alone: a => `${a} gange er et barn alene med sit mærke i en gruppe.`,
+    lonely: c => `Mærket "${c}" har kun ét barn, så reglen om mærker kan ikke overholdes.`,
     tooFew: 'Skriv mindst to navne.',
     dupes: d => `To børn har samme navn: ${d}. Tilføj fx et efternavnsbogstav.`,
     or: 'eller',
@@ -87,7 +89,7 @@ const T = {
     g4t: 'Share or print', g4: 'The address in your browser stores the plan, so you can send it as a link.',
     names: 'The class',
     namesPlaceholder: 'Ida\nNoah\nFreja\nOscar',
-    namesHint: 'Enter one name per line. To use the category rule, add the category after a comma, e.g. "Ida, A".',
+    namesHint: 'Enter one name per line.',
     example: 'Try an example class',
     count: n => (n === 1 ? '1 child' : `${n} children`),
     k: 'Children per group',
@@ -95,9 +97,11 @@ const T = {
     rounds: 'Number of rounds',
     auto: 'Automatic',
     roundsHint: 'Leave empty to get the fewest rounds in which everyone meets.',
-    catTitle: 'Categories',
-    catRule: 'Nobody is alone with their category in a group',
-    catHint: 'Each group has either none or at least two children of each category. Children without a category don\'t count.',
+    catTitle: 'Tags (optional)',
+    catIntro: 'Give children a shared tag by adding it after the name with a comma, e.g. "Ida, A". You can then make sure that a child with a tag is never the only one with that tag in their group.',
+    catRule: 'No child is alone with their tag in a group',
+    catNone: 'No children have a tag yet.',
+    catFound: tags => `Tags in the class: ${tags.map(([c, m]) => `${c} (${m === 1 ? '1 child' : `${m} children`})`).join(', ')}.`,
     seedTitle: 'Advanced: seed',
     seed: 'Seed',
     seedHint: 'The same seed gives the same plan.',
@@ -116,7 +120,7 @@ const T = {
     badLink: 'The link is invalid or incomplete. Ask for a new link.',
     mathTitle: 'How does the mathematics work?',
     figTitle: '9 children in groups of 3 over 4 rounds',
-    computingLong: 'Searching thoroughly. This can take up to a minute …',
+    computingLong: 'Searching thoroughly. This can take a while …',
     scoreLabel: 'penalty points',
     scoreText: b => `Lower is better. No plan with this number of rounds can get below ${b}.`,
     scoreBest: 'No plan with this number of rounds can do better.',
@@ -143,8 +147,8 @@ const T = {
     maxMeet: m => (m === 1 ? 'Two children are in a group together at most once.' : `Two children are in a group together at most ${m} times.`),
     hosts: (lo, hi) => (lo === hi ? `Every child hosts ${lo === 1 ? 'once' : `${lo} times`}.` : `Every child hosts ${lo} or ${hi} times.`),
     hostOnce: r => `For every child to host exactly once, the plan needs ${r} rounds.`,
-    alone: a => `${a} times a child is alone with their category in a group.`,
-    lonely: c => `The category "${c}" has only one child, so the category rule can't be met.`,
+    alone: a => `${a} times a child is alone with their tag in a group.`,
+    lonely: c => `The tag "${c}" has only one child, so the tag rule can't be met.`,
     tooFew: 'Enter at least two names.',
     dupes: d => `Two children have the same name: ${d}. Add an initial, for example.`,
     or: 'or',
@@ -227,13 +231,20 @@ function parseNames() {
 }
 
 function updateCount() {
-  const n = parseNames().length;
-  $('count').textContent = n ? T[lang].count(n) : '';
+  const people = parseNames();
+  $('count').textContent = people.length ? T[lang].count(people.length) : '';
+  const tags = new Map();
+  for (const { cat } of people) {
+    if (!cat) continue;
+    const key = [...tags.keys()].find(c => c.toLowerCase() === cat.toLowerCase()) ?? cat;
+    tags.set(key, (tags.get(key) || 0) + 1);
+  }
+  $('cat-status').textContent = tags.size ? T[lang].catFound([...tags]) : T[lang].catNone;
 }
 
 function readInput() {
   const people = parseNames();
-  // Categories match case-insensitively and display as first written.
+  // Tags match case-insensitively and display as first written.
   const cats = [...new Set(people.map(p => p.cat.toLowerCase()).filter(Boolean))];
   return {
     names: people.map(p => p.name),
@@ -268,7 +279,22 @@ function compute(msg, done) {
   worker.postMessage(msg);
 }
 
-// Thorough search runs eight times as many annealing steps.
+// Runs independent searches with different seeds side by side, and keeps the plan with the
+// fewest rounds and then the lowest score. Workers don't run on file://, so there it runs two in turn.
+function computeBest(msgs, done) {
+  const plans = [];
+  msgs.forEach(msg => compute(msg, plan => {
+    plans.push(plan);
+    if (plans.length < msgs.length) return;
+    const key = p => [p.length, evaluate(p, msg.n, msg.cat).score];
+    done(plans.reduce((a, b) => {
+      const [ra, sa] = key(a), [rb, sb] = key(b);
+      return rb < ra || (rb === ra && sb < sa) ? b : a;
+    }));
+  }));
+}
+
+// Thorough search runs one longer search per CPU core, at most 8.
 function run(thorough = false) {
   const t = T[lang];
   const input = readInput();
@@ -281,8 +307,11 @@ function run(thorough = false) {
   btns.forEach(b => (b.disabled = true));
   $('out').replaceChildren(h('p', { class: 'empty' }, thorough ? t.computingLong : t.computing));
   const msg = { n: input.names.length, k: input.k, rounds: input.rounds, cat: input.cat, seed: input.seed };
-  if (thorough) Object.assign(msg, { iterations: 4000000, restarts: 2 });
-  compute(msg, plan => {
+  const searches = location.protocol === 'file:' ? 2 : Math.min(navigator.hardwareConcurrency || 4, 8);
+  const msgs = thorough
+    ? Array.from({ length: searches }, (_, i) => ({ ...msg, seed: msg.seed + i * 7919, iterations: 2000000, restarts: 1 }))
+    : [msg];
+  computeBest(msgs, plan => {
     btns.forEach(b => (b.disabled = false));
     last = { ...input, plan, labels: last?.labels || [] };
     followed = -1;

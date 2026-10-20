@@ -102,6 +102,7 @@
     background: #fff linear-gradient(transparent calc(1.6rem - 1px), var(--grid) 0) 0 .4rem / 100% 1.6rem local;
   }
   input[type=number] { width: 7rem; padding: .45rem .6rem; }
+  .cat-intro { margin: 0 0 .6rem; }
   .check { display: flex; gap: .6rem; align-items: flex-start; }
   .check input { width: 1.15rem; height: 1.15rem; margin: .2rem 0 0; accent-color: var(--ink); flex: none; }
   details.seed summary { cursor: pointer; color: var(--muted); font-size: .95rem; }
@@ -281,7 +282,7 @@ AI er ikke involveret i beregningen – kun matematik.</span></p>
         <span class="count" id="count" aria-live="polite"></span>
       </div>
       <textarea id="names" spellcheck="false" autocomplete="off" data-tp="namesPlaceholder" placeholder="Ida&#10;Noah&#10;Freja&#10;Oscar"></textarea>
-      <p class="hint" data-t="namesHint">Skriv ét navn per linje. Vil du bruge kategorireglen, så skriv kategorien efter et komma, fx "Ida, A".</p>
+      <p class="hint" data-t="namesHint">Skriv ét navn per linje.</p>
       <button type="button" id="example" class="link" data-t="example">Prøv med en eksempel-klasse</button>
     </div>
 
@@ -297,9 +298,10 @@ AI er ikke involveret i beregningen – kun matematik.</span></p>
         <p class="hint" data-t="roundsHint">Lad feltet stå tomt for at få det mindste antal runder, hvor alle mødes.</p>
       </div>
       <fieldset class="field">
-        <legend class="label" data-t="catTitle">Kategorier</legend>
-        <label class="check" style="font-weight:400"><input id="cat" type="checkbox"> <span data-t="catRule">Ingen er alene om sin kategori i en gruppe</span></label>
-        <p class="hint" data-t="catHint">Hver gruppe har enten ingen eller mindst to børn fra hver kategori. Børn uden kategori tæller ikke med.</p>
+        <legend class="label" data-t="catTitle">Mærker (valgfrit)</legend>
+        <p class="hint cat-intro" data-t="catIntro">Giv børn et fælles mærke ved at skrive det efter navnet med et komma, fx "Ida, A". Så kan du sikre, at et barn med et mærke aldrig er det eneste med mærket i sin gruppe.</p>
+        <label class="check" style="font-weight:400"><input id="cat" type="checkbox"> <span data-t="catRule">Intet barn er alene med sit mærke i en gruppe</span></label>
+        <p class="hint" id="cat-status" aria-live="polite">Ingen børn har et mærke endnu.</p>
       </fieldset>
       <details class="field seed">
         <summary data-t="seedTitle">Avanceret: seed</summary>
