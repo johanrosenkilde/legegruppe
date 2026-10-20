@@ -158,6 +158,9 @@
   .share-row input { flex: 1; min-width: 0; font: .9rem var(--body); padding: .55rem .6rem; border: 1.5px solid var(--line); border-radius: 8px; color: var(--muted); }
   .share a { display: inline-block; margin-top: .5rem; color: var(--ink); text-underline-offset: 3px; }
   .own-plan { text-align: center; margin: 2rem 0 0; }
+  .source { margin-top: 1.5rem; text-align: center; font-size: .9rem; color: var(--muted); }
+  .source p { margin: 0; }
+  .source a { color: var(--ink); text-underline-offset: 3px; }
   .own-plan a { color: var(--ink); font-weight: 700; text-underline-offset: 3px; }
   body.view .lead, body.view .privacy, body.view .guide, body.view .sheet, body.view details.math { display: none; }
   body.view .masthead h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); }
@@ -242,7 +245,7 @@
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   @media print {
     body { background: #fff; font-size: 12px; }
-    .masthead .lead, #lang, .guide, .sheet, .toolbar, details.panel, .privacy, .facts, .score { display: none !important; }
+    .masthead .lead, #lang, .guide, .sheet, .toolbar, details.panel, .privacy, .source, .facts, .score { display: none !important; }
     .masthead h1 { font-size: 2rem; }
     .round { break-inside: avoid; }
     .round-label { border: 0; padding: 0; background: none; font-weight: 700; }
@@ -383,6 +386,11 @@ AI er ikke involveret i beregningen – kun matematik.</span></p>
     </div>
     </div>
   </details>
+
+  <footer class="source">
+    <p data-lang="da" lang="da">Legegruppe værktøjet er open source. <a href="https://github.com/johanrosenkilde/legegruppe">Se koden her</a>.</p>
+    <p data-lang="en" lang="en" hidden>The play group tool is open source. <a href="https://github.com/johanrosenkilde/legegruppe">See the code here</a>.</p>
+  </footer>
 
 </main>
 <script src="solver.js"></script>
