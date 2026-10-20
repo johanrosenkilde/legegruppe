@@ -161,7 +161,7 @@ const $ = id => document.getElementById(id);
 // Joins [2, 6, 10] as "2, 6 og 10".
 const list = (xs, and) => (xs.length < 2 ? String(xs[0]) : `${xs.slice(0, -1).join(', ')} ${and} ${xs.at(-1)}`);
 const params = new URLSearchParams(location.hash.slice(1));
-let lang = params.get('lang') || (navigator.language.startsWith('da') ? 'da' : 'en');
+let lang = params.get('lang') === 'en' ? 'en' : 'da';
 let last = null;
 let followed = -1;
 let view = false;
